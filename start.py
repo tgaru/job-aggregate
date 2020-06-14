@@ -4,6 +4,7 @@
 import os
 import requests
 import json
+import telethon
 from telethon import TelegramClient, events, sync
 from telethon.extensions import html
 from dotenv import load_dotenv
@@ -33,17 +34,14 @@ async def handler(event):
     print('new message')
 
     if event.message.reply_to_msg_id:
-        print('has reply_to_msg_id')
         return
 
     if not hasattr(event.message.to_id, 'channel_id'):
-        print('no channel_id')
         return
 
     chat = await telegram.get_entity(event.chat)
 
     if not hasattr(chat, 'username'):
-        print('no username')
         return
 
     tag_found = False
@@ -54,14 +52,13 @@ async def handler(event):
             tag_found = True
 
     if not tag_found:
-        print ('tags not found')
         return
 
     print('New message from @' + str(chat.username) + ' | ID: ' + str(chat.id))
 
     source_message = html.unparse(event.message.message, event.message.entities)
     source_link = '<a href="https://t.me/' + str(chat.username) + '/' + str(event.message.id) + \
-                  '">@' + str(chat.username) + '</a>' if chat.username else chat.name
+                  '">@' + str(chat.username) + '</a>' if chat.username else telethon.utils.get_display_name(chat)
     bottom_message = 'Source: ' + source_link
     send_message = source_message + '\n\n' + bottom_message
 
